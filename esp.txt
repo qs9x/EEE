@@ -41,7 +41,7 @@ local Skeleton = {
 }
 Skeleton.__index = Skeleton
 
--- Function to check if a skeleton is visible
+-- Function to check if a skeleton is visible to the player
 function Skeleton:isVisibleToPlayer()
     local character = self.Player.Character
     if not character or not character:FindFirstChild("Head") then return false end
@@ -50,14 +50,20 @@ function Skeleton:isVisibleToPlayer()
     local cameraPosition = Camera.CFrame.Position
     local direction = (headPosition - cameraPosition).unit * 100  -- Raycast towards the head
 
-    -- Raycast to check visibility, we exclude the local player's character
-    local raycastResult = workspace:Raycast(cameraPosition, direction)
+    -- Raycast to check visibility, exclude the local player's character from raycast
+    local raycastParams = RaycastParams.new()
+    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}  -- Exclude local player's character
+    raycastParams.FilterType = Enum.RaycastFilterType.Exclude  -- Ensure the raycast doesn't hit local player's character
     
-    -- If the raycast hits anything and the hit object is not the local player's character
-    if raycastResult and raycastResult.Instance and raycastResult.Instance.Parent ~= LocalPlayer.Character then
+    -- Perform the raycast from camera to the player's head
+    local raycastResult = workspace:Raycast(cameraPosition, direction, raycastParams)
+    
+    -- If the raycast hits something other than the local player's character, return false (not visible)
+    if raycastResult and raycastResult.Instance then
         return false  -- Blocked by an object (e.g., wall)
     end
-    return true  -- Visible
+
+    return true  -- Player is visible (no obstruction)
 end
 
 function Skeleton:UpdateStructure()
