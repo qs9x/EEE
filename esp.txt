@@ -41,31 +41,6 @@ local Skeleton = {
 }
 Skeleton.__index = Skeleton
 
--- Function to check if a skeleton is visible to the player
-function Skeleton:isVisibleToPlayer()
-    local character = self.Player.Character
-    if not character or not character:FindFirstChild("Head") then return false end
-
-    local headPosition = character.Head.Position
-    local cameraPosition = Camera.CFrame.Position
-    local direction = (headPosition - cameraPosition).unit * 100  -- Raycast towards the head
-
-    -- Raycast to check visibility, exclude the local player's character from raycast
-    local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}  -- Exclude local player's character
-    raycastParams.FilterType = Enum.RaycastFilterType.Exclude  -- Ensure the raycast doesn't hit local player's character
-    
-    -- Perform the raycast from camera to the player's head
-    local raycastResult = workspace:Raycast(cameraPosition, direction, raycastParams)
-    
-    -- If the raycast hits something other than the local player's character, return false (not visible)
-    if raycastResult and raycastResult.Instance then
-        return false  -- Blocked by an object (e.g., wall)
-    end
-
-    return true  -- Player is visible (no obstruction)
-end
-
 function Skeleton:UpdateStructure()
     if not self.Player.Character then return end
 
@@ -160,12 +135,8 @@ function Skeleton:Update()
         return
     end
 
-    -- Check visibility and update skeleton color
-    if self:isVisibleToPlayer() then
-        self:SetColor(Color3.fromRGB(144, 238, 144))  -- Light Green if visible
-    else
-        self:SetColor(Color3.fromRGB(255, 0, 0))  -- Red if not visible (behind wall)
-    end
+    -- Always set the color to white (no visibility check)
+    self:SetColor(Color3.fromRGB(255, 255, 255))  -- White color
 
     self:SetAlpha(self.Alpha)
     self:SetThickness(self.Thickness)
